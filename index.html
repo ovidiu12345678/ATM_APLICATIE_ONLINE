@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>ATM</h1>
+    <div id="formular-creare-cont">
+      <h2>Creare Cont</h2>
+      <form id="formular-creare">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="parola">Parola:</label>
+        <input type="password" id="parola" name="parola" required>
+        <button type="submit">Creare Cont</button>
+      </form>
+    </div>
+
+    <div id="formular-logare" style="display: none;">
+      <h2>Logare</h2>
+      <form id="formular-logare">
+        <label for="username-login">Username:</label>
+        <input type="text" id="username-login" name="username-login" required>
+        <label for="parola-login">Parola:</label>
+        <input type="password" id="parola-login" name="parola-login" required>
+        <button type="submit">Logare</button>
+      </form>
+    </div>
+
+    <div id="operatii" style="display: none;">
+      <h2>Operatii</h2>
+      <button id="interogare-sold">Interogare Sold</button>
+      <button id="adaugare-numerar">Adaugare Numerar</button>
+      <button id="retragere-numerar">Retragere Numerar</button>
+      <button id="delogare">Delogare</button>
+    </div>
+
+    <div id="rezultat" style="display: none;">
+      <h2>Rezultat</h2>
+      <p id="rezultat-text"></p>
+    </div>
+  </div>
+
+  <script>
+
+    class Utilizator {
+      constructor(username, parola) {
+        this.username = username;
+        this.parola = parola;
+        this.sold = 0;
+      }
+
+
+      adaugareNumerar(sum) {
+        this.sold += sum;
+        afisareRezultat(`Ai adaugat ${sum} RON. Sold disponibil: ${this.sold} RON.`);
+      }
+
+
+      retragereNumerar(sum) {
+        if (sum > this.sold) {
+          afisareRezultat("Fonduri insuficiente.");
+        } else {
+          this.sold -= sum;
+          afisareRezultat(`Ai retras ${sum} RON. Sold disponibil: ${this.sold} RON.`);
+        }
+      }
+
+
+      interogareSold() {
+        afisareRezultat(`Sold disponibil: ${this.sold} RON.`);
+      }
+    }
+
+
+    let utilizatorCurent = null;
+
+
+    function creareCont(username, parola) {
+      utilizatorCurent = new Utilizator(username, parola);
+      afisareFormularLogare();
+    }
+
+
+    function afisareFormularLogare() {
+      document.querySelector('#formular-creare-cont').style.display = 'none';
+      document.querySelector('#formular-logare').style.display = 'block';
+    }
+
+
+    function logare(username, parola) {
+      if (utilizatorCurent && utilizatorCurent.username === username && utilizatorCurent.parola === parola) {
+        afisareRezultat(`Bun venit, ${username}!`);
+        document.querySelector('#formular-logare').style.display = 'none';
+        document.querySelector('#operatii').style.display = 'block';
+        return true;
+      } else {
+        afisareRezultat("Nume utilizator sau parola incorecte. Va rugam sa incercati din nou.");
+        return false;
+      }
+    }
+
+
+    function delogare() {
+      utilizatorCurent = null;
+      document.querySelector('#formular-logare').style.display = 'block';
+      document.querySelector('#operatii').style.display = 'none';
+      ascundeRezultat();
+    }
+
+
+    function afisareRezultat(text) {
+      const rezultat = document.querySelector('#rezultat-text');
+      rezultat.textContent = text;
+      document.querySelector('#rezultat').style.display = 'block';
+    }
+
+
+    function ascundeRezultat() {
+      document.querySelector('#rezultat').style.display = 'none';
+    }
+
+
+    document.querySelector('#formular-creare').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const username = document.querySelector('#username').value;
+      const parola = document.querySelector('#parola').value;
+      creareCont(username, parola);
+      afisareRezultat(`Cont creat pentru ${username}. Va rugam sa va logati.`);
+    });
+
+
+    document.querySelector('#formular-logare').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const username = document.querySelector('#username-login').value;
+      const parola = document.querySelector('#parola-login').value;
+      logare(username, parola);
+    });
+
+
+    document.querySelector('#interogare-sold').addEventListener('click', function () {
+      if (utilizatorCurent) {
+        utilizatorCurent.interogareSold();
+      } else {
+        afisareRezultat("Trebuie sa va autentificati pentru a accesa aceasta operatie.");
+      }
+    });
+
+
+    document.querySelector('#adaugare-numerar').addEventListener('click', function () {
+      if (utilizatorCurent) {
+        const suma = prompt("Introduceti suma pe care doriti sa o adaugati:");
+        if (suma !== null && !isNaN(parseFloat(suma))) {
+          utilizatorCurent.adaugareNumerar(parseFloat(suma));
+        } else {
+          afisareRezultat("Va rugam sa introduceti o suma valida.");
+        }
+      } else {
+        afisareRezultat("Trebuie sa va autentificati pentru a accesa aceasta operatie.");
+      }
+    });
+
+
+    document.querySelector('#retragere-numerar').addEventListener('click', function () {
+      if (utilizatorCurent) {
+        const suma = prompt("Introduceti suma pe care doriti sa o retrageti:");
+        if (suma !== null && !isNaN(parseFloat(suma))) {
+          utilizatorCurent.retragereNumerar(parseFloat(suma));
+        } else {
+          afisareRezultat("Va rugam sa introduceti o suma valida.");
+        }
+      } else {
+        afisareRezultat("Trebuie sa va autentificati pentru a accesa aceasta operatie.");
+      }
+    });
+
+
+    document.querySelector('#delogare').addEventListener('click', function () {
+      delogare();
+    });
+  </script>
+</body>
+
+</html>
